@@ -25,14 +25,14 @@ def sign_up():
             return jsonify({"err": "Username already taken"}), 400
         hashed_password = bcrypt.hashpw(
             bytes(new_user_data["password"], 'utf-8'), bcrypt.gensalt())
-        cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s) RETURNING id, username",
-                       (new_user_data["username"], hashed_password.decode('utf-8')))
+        cursor.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s) RETURNING id, username, email",
+                       (new_user_data["username"], new_user_data["email"], hashed_password.decode('utf-8')))
         created_user = cursor.fetchone()
         connection.commit()
         connection.close()
 
         payload = {
-            "username": created_user["username"], "id": created_user["id"]}
+            "username": created_user["username"], "id": created_user["id"], "email": created_user["email"]}
 
         token = jwt.encode({"payload": payload}, os.getenv('JWT_SECRET'))
 
