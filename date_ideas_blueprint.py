@@ -149,3 +149,27 @@ def date_idea_show(date_idea_id):
             return jsonify({"error": "Date idea not found"}), 404
     except Exception as error:
         return jsonify({"error": str(error)}), 500
+
+
+@date_ideas_blueprint.route('/date-ideas/<date_idea_id>', methods=['DELETE'])
+@token_required
+def delete_date_idea(date_idea_id):
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(
+            cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute(
+            "SELECT * FROM date_ideas WHERE date_ideas.id = %s", (date_idea_id,))
+        date_idea_to_delete = cursor.fetchone()
+        if date_idea_to_delete is None:
+            return jsonify({"error": "Date idea not found"}), 404
+        connection.commit()
+        if date_idea_to_delete["author"] is not g.user["id"]:
+            return jsonify({"error": "Unauthorized"}), 401
+        cursor.execute(
+            "DELETE FROM date_ideas WHERE date_ideas.id = %s", (date_idea_id,))
+        connection.commit()
+        connection.close()
+        return jsonify(date_idea_to_delete), 200
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
