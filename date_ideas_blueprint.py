@@ -87,3 +87,27 @@ def update_date_idea(date_idea_id):
         return jsonify(updated_date_idea), 200
     except Exception as error:
         return jsonify({"error": str(error)}), 500
+
+
+@date_ideas_blueprint.route('/date-ideas', methods=['GET'])
+def date_ideas_index():
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(
+            cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("""SELECT d.id, 
+                            d.author AS date_idea_author_id, 
+                            d.name, 
+                            d.description, 
+                            d.category, 
+                            u_date_idea.username AS author_username
+                        FROM date_ideas d
+                        JOIN users u_date_idea ON d.author = u_date_idea.id
+                       """,)
+        date_ideas = cursor.fetchall()
+
+        connection.commit()
+        connection.close()
+        return jsonify(date_ideas), 200
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
