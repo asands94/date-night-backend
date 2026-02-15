@@ -10,7 +10,7 @@ date_ideas_blueprint = Blueprint('date_ideas_blueprint', __name__)
 
 @date_ideas_blueprint.route('/date-ideas', methods=['POST'])
 @token_required
-def create_hoot():
+def create_date_idea():
     try:
         author_id = g.user["id"]
 
